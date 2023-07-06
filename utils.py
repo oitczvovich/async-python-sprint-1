@@ -14,14 +14,24 @@ CITIES = {
     "BUCHAREST": "https://code.s3.yandex.net/async-module/bucharest-response.json",
     "ROMA": "https://code.s3.yandex.net/async-module/roma-response.json",
     "CAIRO": "https://code.s3.yandex.net/async-module/cairo-response.json",
-
-    "GIZA": "https://code.s3.yandex.net/async-module/giza-response.json",
-    "MADRID": "https://code.s3.yandex.net/async-module/madrid-response.json",
-    "TORONTO": "https://code.s3.yandex.net/async-module/toronto-response.json"
+    # города с ошибками
+    # "GIZA": "https://code.s3.yandex.net/async-module/giza-response.json",
+    # "MADRID": "https://code.s3.yandex.net/async-module/madrid-response.json",
+    # "TORONTO": "https://code.s3.yandex.net/async-module/toronto-response.json"
 }
+
+ERR_MESSAGE_TEMPLATE = "Something wrong. Please contact with mentor."
+
+FROM_HOUR = 9
+TO_HOUR = 19
+
+DRY_WEATHER = ('clear', 'overcast', 'cloudy', 'partly-cloudy')
+
+FILE_NAME = 'forecast_research.csv'
 
 MIN_MAJOR_PYTHON_VER = 3
 MIN_MINOR_PYTHON_VER = 9
+
 
 
 def check_python_version():

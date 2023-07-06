@@ -1,10 +1,8 @@
-import json
 import logging
-from http import HTTPStatus
+import json
 from urllib.request import urlopen
 
-ERR_MESSAGE_TEMPLATE = "Unexpected error: {error}"
-
+from utils import CITIES, ERR_MESSAGE_TEMPLATE
 
 logger = logging.getLogger()
 
@@ -14,27 +12,37 @@ class YandexWeatherAPI:
     Base class for requests
     """
 
-    def __do_req(url: str) -> str:
+    @staticmethod
+    def _do_req(url):
         """Base request method"""
         try:
-            with urlopen(url) as response:
-                resp_body = response.read().decode("utf-8")
-                data = json.loads(resp_body)
-            if response.status != HTTPStatus.OK:
+            with urlopen(url) as req:
+                resp = req.read().decode("utf-8")
+                resp = json.loads(resp)
+            if req.status != 200:
                 raise Exception(
                     "Error during execute request. {}: {}".format(
-                        resp_body.status, resp_body.reason
+                        resp.status, resp.reason
                     )
                 )
-            return data
+            return resp
         except Exception as ex:
             logger.error(ex)
-            raise Exception(ERR_MESSAGE_TEMPLATE.format(error=ex))
+            raise Exception(ERR_MESSAGE_TEMPLATE)
 
     @staticmethod
-    def get_forecasting(url: str):
+    def _get_url_by_city_name(city_name: str) -> str:
+        try:
+            return CITIES[city_name]
+        except KeyError:
+            raise Exception(
+                "Please check that city {} exists".format(city_name)
+            )
+
+    def get_forecasting(self, city_name: str):
         """
-        :param url: url_to_json_data as str
+        :param city_name: key as str
         :return: response data as json
         """
-        return YandexWeatherAPI.__do_req(url)
+        city_url = self._get_url_by_city_name(city_name)
+        return self._do_req(city_url)
