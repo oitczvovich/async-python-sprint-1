@@ -7,7 +7,7 @@ from multiprocessing.process import AuthenticationString
 from typing import Any
 
 from external.client import YandexWeatherAPI
-from entities import DailyTemp, CityTemp, InitialForecast
+from entities import DailyTemp, CityTemp, InitialForecast, CustomException
 from utils import DRY_WEATHER, FILE_NAME, FROM_HOUR, TO_HOUR
 
 
@@ -22,20 +22,20 @@ class DataFetchingTask(Process):
     def __init__(
             self,
             *,
+            api: YandexWeatherAPI,
             fetch_data_queue: Queue,
             cities: dict[str, Any]
             ) -> None:
         super().__init__()
-        self.api = YandexWeatherAPI()
+        self.api = api
         self.fetch_data_queue = fetch_data_queue
         self.cities = cities
 
     def get_city_forecasts(self, city_name: str) -> tuple[str, dict[str, Any]]:
         try:
             result = self.api.get_forecasting(city_name=city_name)
-        except Exception as error:
+        except CustomException as error:
             logging.exception(f"Failed to fetch data from api: {error}")
-            raise error
         return city_name, result
 
     def run(self) -> None:
@@ -82,7 +82,7 @@ class DataCalculationTask(Process):
 
     @staticmethod
     def _check_hour(hour) -> bool:
-        return bool(int(hour) >= FROM_HOUR and int(hour) <= TO_HOUR)
+        return int(hour) >= FROM_HOUR and int(hour) <= TO_HOUR
 
     def get_daily_avg_temp(
             self,
@@ -150,11 +150,9 @@ class DataAggregationTask(Process):
         self.analyz_data_queue = analyz_data_queue
     
     def agregate_forcecast(self, forcecast_data: CityTemp) -> dict[str, Any]:
-        day_forecasts = {}
+        day_forecasts = {"Город": forcecast_data.city, "": "Температура, среднее / Без осадков, часов"}
         avg_temp_list = []
         avg_dry_hours_list = []
-        day_forecasts["Город"] = forcecast_data.city
-        day_forecasts[""] = "Температура, среднее / Без осадков, часов"
         for item in forcecast_data.daily_avg_temps:
             date = item.date
             date_avg_temp = item.avg_temp
@@ -234,6 +232,6 @@ class DataAnalyzingTask(Process):
             if len(most_comfort_cities) == 1:
                 msg = f"Самый комфортный город - {most_comfort_cities[0]}"
             else:
-                msg = f"Самые комфортные города - "
+                msg = "Самые комфортные города - "
                 f"{', '.join(most_comfort_cities)}"
             logger.info(msg)

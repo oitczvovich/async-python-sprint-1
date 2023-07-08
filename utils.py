@@ -33,7 +33,6 @@ MIN_MAJOR_PYTHON_VER = 3
 MIN_MINOR_PYTHON_VER = 9
 
 
-
 def check_python_version():
     import sys
 

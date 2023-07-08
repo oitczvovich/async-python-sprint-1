@@ -19,3 +19,7 @@ class DailyTemp:
 class CityTemp:
     city: str  # Название города
     daily_avg_temps: list[DailyTemp]  # Средняя дневная температура по дням
+
+
+class CustomException(Exception):
+    pass

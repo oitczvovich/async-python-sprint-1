@@ -12,13 +12,17 @@ from utils import CITIES
 
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s: %(name)s - %(levelname)s - %(message)s'
+)
 
 
 def forecast_weather():
     """
     Анализ погодных условий по городам.
     """
-
+    api = YandexWeatherAPI()
     manager = multiprocessing.Manager()
     fetch_data_queue = manager.Queue()
 
@@ -26,6 +30,7 @@ def forecast_weather():
     analyz_data_queue = manager.Queue()
 
     data_fetching_producer = DataFetchingTask(
+        api=api,
         fetch_data_queue=fetch_data_queue,
         cities=CITIES
         )
